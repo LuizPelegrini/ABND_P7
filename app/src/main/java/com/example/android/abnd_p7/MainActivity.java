@@ -1,16 +1,20 @@
 package com.example.android.abnd_p7;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.abnd_p7.data.StoreContract;
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
 import com.example.android.abnd_p7.data.StoreDbHelper;
 
@@ -21,12 +25,20 @@ public class MainActivity extends AppCompatActivity {
 
     private SQLiteOpenHelper mStoreDbHelper;                    // Reference to the store SqlHelper
     @BindView(R.id.result_text_view) TextView mDataTextView;    // Reference to the view that shows the results
-
+    @BindView(R.id.fab) FloatingActionButton mFloatActionButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        mFloatActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                startActivity(intent);
+            }
+        });
 
         mStoreDbHelper = new StoreDbHelper(this);
 
@@ -61,9 +73,6 @@ public class MainActivity extends AppCompatActivity {
     private void displayInfo(){
         mDataTextView.setText("");
 
-        // Reads from the database
-        SQLiteDatabase db = mStoreDbHelper.getReadableDatabase();
-
         // Choose the columns I want to show
         String[] projection = new String[]{
             ProductEntry._ID,
@@ -75,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // Query the database for the results
-        Cursor cursor = db.query(ProductEntry.TABLE_NAME, projection, null, null, null, null, null);
+        Cursor cursor = getContentResolver().query(ProductEntry.CONTENT_URI, projection, null, null, null);
 
         mDataTextView.append(ProductEntry.COLUMN_PRODUCT_NAME + " | "
                 + ProductEntry.COLUMN_PRODUCT_PRICE + " | "
