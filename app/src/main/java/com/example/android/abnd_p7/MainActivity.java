@@ -56,18 +56,17 @@ public class MainActivity extends AppCompatActivity {
         contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME, supplierName);
         contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE, supplierPhone);
 
-        // Get an instance of the database for writing purposes
-        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
-
         // Perform insert operation
-        long id = db.insert(ProductEntry.TABLE_NAME, null, contentValues);
+        getContentResolver().insert(ProductEntry.CONTENT_URI, contentValues);
+        displayInfo();
 
-        if(id >= 0){
-            Toast.makeText(this, getString(R.string.product_added, id), Toast.LENGTH_LONG).show();
-            displayInfo();
-        }else{
-            Toast.makeText(this, getString(R.string.error_add), Toast.LENGTH_LONG).show();
-        }
+//
+//        if(id >= 0){
+//            Toast.makeText(this, getString(R.string.product_added, id), Toast.LENGTH_LONG).show();
+//            displayInfo();
+//        }else{
+//            Toast.makeText(this, getString(R.string.error_add), Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void displayInfo(){

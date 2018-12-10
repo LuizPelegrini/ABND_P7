@@ -54,7 +54,16 @@ private static final int PRODUCT_ID = 1;                                        
 
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        return null;
+        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)){
+            case PRODUCT:
+                long id = db.insert(ProductEntry.TABLE_NAME, null, contentValues);
+                if(id != -1L)
+                    return ContentUris.withAppendedId(uri, id);
+                return null;
+            default:
+                throw new IllegalArgumentException("Cannot insert with URI " + uri);
+        }
     }
 
     @Override
