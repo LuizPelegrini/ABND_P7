@@ -1,3 +1,6 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">ABND_P7</string>
+    <string name="insert_dummy_data">Insert dummy data</string>
+    <string name="product_added">Product <xliff:g id="prod_id" example="1">%d</xliff:g> added</string>
+    <string name="error_add">Error adding the product</string>
 </resources>
