@@ -3,29 +3,30 @@ package com.example.android.abnd_p7;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.android.abnd_p7.data.StoreContract;
+import com.example.android.abnd_p7.adapter.ProductAdapter;
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
-import com.example.android.abnd_p7.data.StoreDbHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    private SQLiteOpenHelper mStoreDbHelper;                    // Reference to the store SqlHelper
     @BindView(R.id.result_text_view) TextView mDataTextView;    // Reference to the view that shows the results
     @BindView(R.id.fab) FloatingActionButton mFloatActionButton;
+    @BindView(R.id.list_view) ListView mListView;
+
+    private CursorAdapter mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,14 +41,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mStoreDbHelper = new StoreDbHelper(this);
+        mAdapter = new ProductAdapter(this, null);
+        mListView.setAdapter(mAdapter);
 
         // Display info upon creating the activity
-        displayInfo();
+//        displayInfo();
     }
 
     /** Inserts the data in the database */
-    private void insertData(String name, int price, int quantity, String supplierName, String supplierPhone){
+    private void insertDummyProduct(String name, int price, int quantity, String supplierName, String supplierPhone){
         // Create a content values object and fill it with data
         ContentValues contentValues = new ContentValues();
         contentValues.put(ProductEntry.COLUMN_PRODUCT_NAME, name);
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
     }
 
-    private void displayInfo(){
+    private Cursor displayInfo(){
         mDataTextView.setText("");
 
         // Choose the columns I want to show
@@ -85,39 +87,40 @@ public class MainActivity extends AppCompatActivity {
         // Query the database for the results
         Cursor cursor = getContentResolver().query(ProductEntry.CONTENT_URI, projection, null, null, null);
 
-        mDataTextView.append(ProductEntry.COLUMN_PRODUCT_NAME + " | "
-                + ProductEntry.COLUMN_PRODUCT_PRICE + " | "
-                + ProductEntry.COLUMN_PRODUCT_QUANTITY + " | "
-                + ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME + " | "
-                + ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE + " | \n");
-
-        // Gets the index of each column
-        int idIndex = cursor.getColumnIndex(ProductEntry._ID);
-        int nameIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_NAME);
-        int priceIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
-        int quantityIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
-        int supplierNameIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME);
-        int supplierPhoneIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE);
-
-
-        try{
-            // Show each entry of the table...
-            while(cursor.moveToNext()){
-                // Get the data for each entry
-                int id = cursor.getInt(idIndex);
-                String name = cursor.getString(nameIndex);
-                int price = cursor.getInt(priceIndex);
-                int quantity = cursor.getInt(quantityIndex);
-                String supplierName = cursor.getString(supplierNameIndex);
-                String supplierPhone = cursor.getString(supplierPhoneIndex);
-
-                // Append to the text view
-                mDataTextView.append(id + ", " + name + ", " + price + ", " +quantity + ", " +supplierName + ", " + supplierPhone + "\n");
-            }
-        }finally{
-            // Closes the cursor and make it invalid
-            cursor.close();
-        }
+        return cursor;
+//        mDataTextView.append(ProductEntry.COLUMN_PRODUCT_NAME + " | "
+//                + ProductEntry.COLUMN_PRODUCT_PRICE + " | "
+//                + ProductEntry.COLUMN_PRODUCT_QUANTITY + " | "
+//                + ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME + " | "
+//                + ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE + " | \n");
+//
+//        // Gets the index of each column
+//        int idIndex = cursor.getColumnIndex(ProductEntry._ID);
+//        int nameIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_NAME);
+//        int priceIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
+//        int quantityIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
+//        int supplierNameIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME);
+//        int supplierPhoneIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE);
+//
+//
+//        try{
+//            // Show each entry of the table...
+//            while(cursor.moveToNext()){
+//                // Get the data for each entry
+//                int id = cursor.getInt(idIndex);
+//                String name = cursor.getString(nameIndex);
+//                int price = cursor.getInt(priceIndex);
+//                int quantity = cursor.getInt(quantityIndex);
+//                String supplierName = cursor.getString(supplierNameIndex);
+//                String supplierPhone = cursor.getString(supplierPhoneIndex);
+//
+//                // Append to the text view
+//                mDataTextView.append(id + ", " + name + ", " + price + ", " +quantity + ", " +supplierName + ", " + supplierPhone + "\n");
+//            }
+//        }finally{
+//            // Closes the cursor and make it invalid
+//            cursor.close();
+//        }
     }
 
     @Override
@@ -131,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()){
             // Insert some dummy data for testing
             case R.id.insert_dummy_data:
-                insertData("Android Fundamentals", 20, 2, "Amazon", "555-555-555");
+                insertDummyProduct("Android Fundamentals", 20, 2, "Amazon", "555-555-555");
                 break;
         }
         return true;

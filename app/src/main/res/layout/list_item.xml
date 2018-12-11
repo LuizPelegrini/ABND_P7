@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:padding="8dp">
+
+    <!-- Product Name -->
+    <TextView
+        android:id="@+id/product_name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Product Name"/>
+
+    <!-- Product Price -->
+    <TextView
+        android:id="@+id/product_price_text"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="12.00"/>
+
+    <TextView
+        android:id="@+id/product_quantity_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        tools:text="0"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:text="@string/sale"/>
+
+</RelativeLayout>
