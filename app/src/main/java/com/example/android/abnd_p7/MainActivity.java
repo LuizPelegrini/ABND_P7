@@ -1,9 +1,11 @@
 package com.example.android.abnd_p7;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +56,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mAdapter = new ProductAdapter(this, null);
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                // Creates the intent
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+
+                // Creates the uri based on the product id
+                Uri uri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, id);
+
+                // Put the uri in the intent
+                intent.setDataAndType(uri, getContentResolver().getType(uri));
+
+                // Starts the DetailsActivity with this intent
+                startActivity(intent);
+            }
+        });
 
         getSupportLoaderManager().initLoader(LOADER_ID,null, this);
     }
@@ -67,8 +86,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME, "Amazon");
         contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE, "555-555-555");
 
-        // Perform insert operation through a content provider and if any input is not validated, show a toast message
-        // telling about the error
+        // Perform insert operation through a content provider and if any input is not validated,
+        // show a toast message, telling about the error
         try{
             getContentResolver().insert(ProductEntry.CONTENT_URI, contentValues);
         }

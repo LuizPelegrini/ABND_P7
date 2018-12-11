@@ -56,6 +56,12 @@ public class ProductProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+        switch (sUriMatcher.match(uri)){
+            case PRODUCT:
+                return ProductEntry.CONTENT_TYPE_DIR;
+            case PRODUCT_ID:
+                return ProductEntry.CONTENT_TYPE_ITEM;
+        }
         return null;
     }
 
