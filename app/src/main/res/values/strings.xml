@@ -11,4 +11,13 @@
     <string name="supplier_phone_number">Supplier Phone Number</string>
     <string name="title_activity_details">DetailsActivity</string>
     <string name="sale">SALE</string>
+    <string name="delete_product_menu_action">Delete this product</string>
+    <string name="save_product_menu_action">Save product</string>
+
+    <!--Error messages-->
+    <string name="no_name">You must provide a name.</string>
+    <string name="negative_price">You cannot provide a negative price.</string>
+    <string name="negative_quantity">You cannot provide a negative quantity.</string>
+    <string name="no_supplier_name">You must provide the supplier name.</string>
+    <string name="unknown_error">Unknown error.</string>
 </resources>

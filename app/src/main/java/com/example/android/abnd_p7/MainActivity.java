@@ -3,6 +3,7 @@ package com.example.android.abnd_p7;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,11 +13,13 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.abnd_p7.adapter.ProductAdapter;
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
@@ -52,23 +55,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mListView.setAdapter(mAdapter);
 
         getSupportLoaderManager().initLoader(LOADER_ID,null, this);
-
-        // Display info upon creating the activity
-//        displayInfo();
     }
 
     /** Inserts the data in the database */
-    private void insertDummyProduct(String name, int price, int quantity, String supplierName, String supplierPhone) {
+    private void insertDummyProduct() {
         // Create a content values object and fill it with data
         ContentValues contentValues = new ContentValues();
-        contentValues.put(ProductEntry.COLUMN_PRODUCT_NAME, name);
-        contentValues.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
-        contentValues.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
-        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME, supplierName);
-        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE, supplierPhone);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_NAME, "Android Fundamentals");
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_PRICE, 20);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 2);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME, "Amazon");
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE, "555-555-555");
 
-        // Perform insert operation through a content provider
-        getContentResolver().insert(ProductEntry.CONTENT_URI, contentValues);
+        // Perform insert operation through a content provider and if any input is not validated, show a toast message
+        // telling about the error
+        try{
+            getContentResolver().insert(ProductEntry.CONTENT_URI, contentValues);
+        }
+        catch (SQLException e){
+            showErrorToast(e.getMessage());
+        }
     }
 
     @Override
@@ -82,10 +88,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         switch(item.getItemId()){
             // Insert some dummy data for testing
             case R.id.insert_dummy_data:
-                insertDummyProduct("Android Fundamentals", 20, 2, "Amazon", "555-555-555");
+                insertDummyProduct();
                 break;
         }
         return true;
+    }
+
+    // Shows an error toast when the input is not validated
+    private void showErrorToast(String errorString){
+        String message;
+        switch (errorString){
+            case ProductEntry.COLUMN_PRODUCT_NAME:
+                message = getString(R.string.no_name);
+                break;
+            case ProductEntry.COLUMN_PRODUCT_PRICE:
+                message = getString(R.string.negative_price);
+                break;
+            case ProductEntry.COLUMN_PRODUCT_QUANTITY:
+                message = getString(R.string.negative_quantity);
+                break;
+            case ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME:
+                message = getString(R.string.no_supplier_name);
+                break;
+            default:
+                message = getString(R.string.unknown_error);
+                break;
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     /******************* Loader callbacks *******************/
