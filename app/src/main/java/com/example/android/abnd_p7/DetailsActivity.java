@@ -1,6 +1,5 @@
 package com.example.android.abnd_p7;
 
-import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,13 +11,12 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
 
@@ -29,8 +27,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     private static final int LOADER_ID = 1;
 
-    private boolean mIsCreationMode;                // This specifies whether this activity is on Creation Mode or Edit Mode
-    private Uri mEntryUri;                           // This is the Uri coming from the MainActivity when a product is selected
+    private boolean mIsCreationMode;    // This specifies whether this activity is on Creation Mode or Edit Mode
+    private Uri mEntryUri;              // This is the Uri coming from the MainActivity when a product is selected
+    private int mQuantity;              // The quantity temp variable to increase and decrease
 
     @BindView(R.id.product_name_edit_text) TextInputEditText mProductNameEditText;
     @BindView(R.id.price_edit_text) TextInputEditText mProductPriceEditText;
@@ -46,29 +45,32 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         setContentView(R.layout.details_layout);
         ButterKnife.bind(this);
 
-        // Gets a possible intent coming from the MainActivity
-        // TODO: Query the database using a loader to retrieve info from the product
+        // Gets the intent coming from the MainActivity
         Intent intent = getIntent();
         if(intent.getData() != null){
             mIsCreationMode = false;
             mEntryUri = intent.getData();
             getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        }else{
+            mIsCreationMode = true;
+            setInfoUI("", 0, 0, "","");
         }
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         mDecreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mProductQuantityTextView.setText("0");
+                if(mQuantity > 0){
+                    mQuantity--;
+                    mProductQuantityTextView.setText(String.valueOf(mQuantity));
+                }
             }
         });
 
         mIncreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mProductQuantityTextView.setText("1");
+                mQuantity++;
+                mProductQuantityTextView.setText(String.valueOf(mQuantity));
             }
         });
     }
@@ -95,13 +97,18 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //TODO: hide the delete option if the activity has been initialized at the creation mode
+        if(mIsCreationMode)
+            menu.findItem(R.id.delete_product_action).setVisible(false);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
     private void setInfoUI(String name, int price, int quantity, String supplierName, String supplierPhone){
+        mQuantity = quantity;
+
         mProductNameEditText.setText(name);
         mProductPriceEditText.setText(String.valueOf(price));
-        mProductQuantityTextView.setText(String.valueOf(quantity));
+        mProductQuantityTextView.setText(String.valueOf(mQuantity));
         mSupplierNameEditText.setText(supplierName);
         mSupplierPhoneEditText.setText(supplierPhone);
     }
