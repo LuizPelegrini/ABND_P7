@@ -37,30 +37,31 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         @BindView(R.id.product_price_text) TextView mProductPrice;
         @BindView(R.id.product_quantity_text) TextView mProductQuantity;
 
+        private long id;
+
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             ButterKnife.bind(this, itemView);
 
             // Define click listener for each item in the recycler view
-//            itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    // Creates the intent
-//                    Intent intent = new Intent(context, DetailsActivity.class);
-//
-//                    long id = getItemId();
-//                    Log.d(TAG, "Id: " + id);
-//
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Creates the intent
+                    Intent intent = new Intent(context, DetailsActivity.class);
+
+                    Log.d(TAG, "Id: " + id);
+
 //                    // Creates the uri based on the product id
-//                    Uri uri = ContentUris.withAppendedId(StoreContract.ProductEntry.CONTENT_URI, id);
+                    Uri uri = ContentUris.withAppendedId(StoreContract.ProductEntry.CONTENT_URI, id);
 //
 //                    // Put the uri in the intent
-//                    intent.setDataAndType(uri, context.getContentResolver().getType(uri));
+                    intent.setDataAndType(uri, context.getContentResolver().getType(uri));
 //
 //                    // Starts the DetailsActivity with this intent
-//                    context.startActivity(intent);
-//                }
-//            });
+                    context.startActivity(intent);
+                }
+            });
         }
     }
 
@@ -80,16 +81,19 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         int nameColumnIndex = cursor.getColumnIndex(StoreContract.ProductEntry.COLUMN_PRODUCT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(StoreContract.ProductEntry.COLUMN_PRODUCT_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(StoreContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+        int idColumnIndex = cursor.getColumnIndex(StoreContract.ProductEntry._ID);
 
         // To use them to fetch the data from the column
         String name = cursor.getString(nameColumnIndex);
         String price = formatPrice(cursor.getInt(priceColumnIndex));
         String quantity = String.valueOf(cursor.getInt(quantityColumnIndex));
+        long id = cursor.getLong(idColumnIndex);
 
         // and set the ViewHolder's views data
         viewHolder.mProductName.setText(name);
-        viewHolder.mProductPrice.setText(price);
+        viewHolder.mProductPrice.setText(mContext.getString(R.string.price_format, price));
         viewHolder.mProductQuantity.setText(quantity);
+        viewHolder.id = id;
     }
 
     @Override

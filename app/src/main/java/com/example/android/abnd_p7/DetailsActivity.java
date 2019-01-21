@@ -2,6 +2,7 @@ package com.example.android.abnd_p7;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -11,8 +12,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +36,12 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private boolean mIsCreationMode;    // This specifies whether this activity is on Creation Mode or Edit Mode
     private Uri mEntryUri;              // This is the Uri coming from the MainActivity when a product is selected
     private int mQuantity;              // The quantity temp variable to increase and decrease
+
+    private String mNameToCompare;
+    private int mPriceToCompare;
+    private int mQuantityToCompare;
+    private String mSupplierNameToCompare;
+    private String mSupplierPhoneToCompare;
 
     @BindView(R.id.product_name_edit_text) TextInputEditText mProductNameEditText;
     @BindView(R.id.price_edit_text) TextInputEditText mProductPriceEditText;
@@ -91,11 +100,26 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 // insert the product into the database, show SUCCESS message, go to MainActivity
                 if(saveProduct())
                     finish();
-                break;
+                return true;
             case R.id.delete_product_action:
-                // TODO: show confirmation dialog, delete if accepted, go to MainActivity
-//                deleteProduct();
-                break;
+                // show confirmation dialog, delete if accepted, go to MainActivity
+                showDeleteConfirmationDialog();
+                return true;
+            case android.R.id.home:
+                // Check if the form has been changed
+                if(isFormDirty()){
+                    // If the user wants to discard the changes, navigate back to the MainActivity
+                    showUnsavedChangesDialog(new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            NavUtils.navigateUpFromSameTask(DetailsActivity.this);
+                        }
+                    });
+                } else {
+                    // Navigate back to parent activity
+                    NavUtils.navigateUpFromSameTask(this);
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -109,14 +133,35 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         return super.onPrepareOptionsMenu(menu);
     }
 
+    @Override
+    public void onBackPressed() {
+        // if the form has changed, ask the user if he wants to discard the changes
+        if(isFormDirty()){
+            showUnsavedChangesDialog(new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+        }else{
+            super.onBackPressed();
+        }
+    }
+
     private void setInfoUI(String name, int price, int quantity, String supplierName, String supplierPhone){
         mQuantity = quantity;
 
         mProductNameEditText.setText(name);
+        mNameToCompare = name;
+        // TODO: Format the value of price before setting it in the edittext
         mProductPriceEditText.setText(String.valueOf(price));
+        mPriceToCompare = price;
         mProductQuantityTextView.setText(String.valueOf(mQuantity));
+        mQuantityToCompare = mQuantity;
         mSupplierNameEditText.setText(supplierName);
+        mSupplierNameToCompare = supplierName;
         mSupplierPhoneEditText.setText(supplierPhone);
+        mSupplierPhoneToCompare = supplierPhone;
     }
 
     // Create contentValue object and insert the product into the database
@@ -154,6 +199,69 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         return success;
     }
 
+    private void showDeleteConfirmationDialog(){
+        // Create a dialog builder
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // Set it up
+        alertDialogBuilder.setMessage(R.string.dialog_delete_message);
+        alertDialogBuilder.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int buttonClicked) {
+                deleteProduct();
+                finish();
+            }
+        });
+        alertDialogBuilder.setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(dialogInterface != null)
+                    dialogInterface.dismiss();
+            }
+        });
+
+        // Show it
+        alertDialogBuilder.create().show();
+    }
+
+    private void showUnsavedChangesDialog(DialogInterface.OnClickListener listener){
+        // TODO: show a dialog when any change has been made in the form
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(R.string.dialog_unsaved_message);
+        alertDialogBuilder.setPositiveButton(R.string.dialog_unsaved_discard, listener);
+        alertDialogBuilder.setNegativeButton(R.string.dialog_unsaved_keep_editing, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(dialogInterface != null)
+                    dialogInterface.dismiss();
+            }
+        });
+        alertDialogBuilder.create().show();
+    }
+
+    private boolean isFormDirty(){
+        String name = mProductNameEditText.getText().toString();
+        int quantity = Integer.parseInt(mProductQuantityTextView.getText().toString());
+        // TODO: Get the price edittext and format it to represent a whole number before comparing
+//        int price =
+        String supplierName = mSupplierNameEditText.getText().toString();
+        String supplierPhone = mSupplierPhoneEditText.getText().toString();
+
+        return !name.equals(mNameToCompare) ||
+               quantity != mQuantityToCompare ||
+//                price != mPriceToCompare ||
+               !supplierName.equals(mSupplierNameToCompare) ||
+               !supplierPhone.equals(mSupplierPhoneToCompare);
+    }
+
+    private void deleteProduct(){
+        int rowsAffected = getContentResolver().delete(mEntryUri, null, null);
+        if(rowsAffected > 0){
+            Message.showPlainTextToast(this, getString(R.string.delete_product_successfully));
+        }
+    }
+
+    // TODO: Parse the formatted text into a whole integer
     private int parsePriceText(String priceString){
         return Integer.parseInt(priceString);
     }
@@ -196,6 +304,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
+        // Clear the fields when the data is invalid
+        setInfoUI("", 0, 0, "","");
     }
 }

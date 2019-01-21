@@ -3,14 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
-    android:padding="8dp">
+    android:layout_height="@dimen/item_height">
 
     <!-- Product Name -->
     <TextView
         android:id="@+id/product_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_item_view"
+        android:layout_marginLeft="@dimen/margin_item_view"
+        android:layout_marginStart="@dimen/margin_item_view"
+        android:textStyle="bold"
+        android:textSize="@dimen/product_title_size"
         tools:text="Product Name"/>
 
     <!-- Product Price -->
@@ -19,6 +23,9 @@
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_item_view"
+        android:layout_marginLeft="@dimen/margin_item_view"
+        android:layout_marginStart="@dimen/margin_item_view"
         tools:text="12.00"/>
 
     <TextView
@@ -34,7 +41,16 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/margin_item_view"
+        android:layout_marginEnd="@dimen/margin_item_view"
         android:text="@string/sale"
-        android:focusable="false"/>
+        android:focusable="false" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_alignParentBottom="true"
+        />
 
 </RelativeLayout>

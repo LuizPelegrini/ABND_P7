@@ -9,9 +9,9 @@ import com.example.android.abnd_p7.data.StoreContract;
 public final class Message {
 
     // Shows an error toast when the input is not validated
-    public static void showErrorToast(Context context, String errorString){
+    public static void showErrorToast(Context context, String columnName){
         String message;
-        switch (errorString){
+        switch (columnName){
             case StoreContract.ProductEntry.COLUMN_PRODUCT_NAME:
                 message = context.getString(R.string.no_name);
                 break;
