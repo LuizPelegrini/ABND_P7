@@ -7,7 +7,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
@@ -19,7 +18,7 @@ public class ProductProvider extends ContentProvider {
     private static final int PRODUCT = 0;                                               // The code to help find URI of all entries
     private static final int PRODUCT_ID = 1;                                            // The code to help find URI of a single entry
 
-    private SQLiteOpenHelper mStoreDbHelper;
+    private StoreDbHelper mStoreDbHelper;
 
     static {
         // content://com.example.android.abnd_p7.product/products
@@ -66,7 +65,7 @@ public class ProductProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) throws SQLException{
+    public Uri insert(Uri uri, ContentValues contentValues) throws SQLException, IllegalArgumentException{
         // Matches the URI with content://com.example.android.abnd_p7.product/products
         switch (sUriMatcher.match(uri)){
             case PRODUCT:
@@ -78,15 +77,97 @@ public class ProductProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        switch(sUriMatcher.match(uri)){
+            case PRODUCT:
+                return deleteProduct(uri, selection, selectionArgs);
+            case PRODUCT_ID:
+                selection = ProductEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return deleteProduct(uri, selection, selectionArgs);
+        }
+
         return 0;
     }
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        return 0;
+        switch(sUriMatcher.match(uri)){
+            case PRODUCT:
+                return updateProduct(uri, contentValues, selection, selectionArgs);
+            case PRODUCT_ID:
+                selection = ProductEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updateProduct(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Cannot update with URI " + uri);
+        }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Insert the product into the database
     private Uri insertProduct(Uri uri, ContentValues contentValues) throws SQLException{
+        // Validates the input
+        validateInput(contentValues);
+
+        // Get a database reference to write in the database
+        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
+
+        // Perform the insertion
+        long id = db.insert(ProductEntry.TABLE_NAME, null, contentValues);
+        if(id != -1L) {
+            // Notify a change has been made in this content URI
+            getContext().getContentResolver().notifyChange(ContentUris.withAppendedId(uri, id), null);
+            return ContentUris.withAppendedId(uri, id);
+        }
+
+        // Otherwise return a null URI
+        return null;
+    }
+
+    private int updateProduct(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) throws SQLException{
+        // validates the input
+        validateInput(contentValues);
+
+        // Get a database writable instance
+        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
+
+        // update the registry
+        int rowsAffected = db.update(ProductEntry.TABLE_NAME,contentValues, selection, selectionArgs);
+
+        // If 1 or more rows were updated,
+        // then notify all listeners that the data at the given URI has changed
+        if(rowsAffected > 0){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsAffected;
+    }
+
+    private int deleteProduct(Uri uri, String selection, String[] selectionArgs){
+        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
+        int rowsDeleted = db.delete(ProductEntry.TABLE_NAME, selection, selectionArgs);
+        if(rowsDeleted > 0){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsDeleted;
+    }
+
+    // Validates the input coming from ContentValues
+    private void validateInput(ContentValues contentValues) throws SQLException{
         if(contentValues.size() == 0)
             throw new SQLException("empty");
 
@@ -109,19 +190,5 @@ public class ProductProvider extends ContentProvider {
         String supplierName = contentValues.getAsString(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME);
         if(supplierName == null || TextUtils.isEmpty(supplierName.trim()))
             throw new SQLException(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME);
-
-        // Get a database reference to write in the database
-        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
-
-        // Perform the insertion
-        long id = db.insert(ProductEntry.TABLE_NAME, null, contentValues);
-        if(id != -1L) {
-            // Notify a change has been made in this content URI
-            getContext().getContentResolver().notifyChange(ContentUris.withAppendedId(uri, id), null);
-            return ContentUris.withAppendedId(uri, id);
-        }
-
-        // Otherwise return a null URI
-        return null;
     }
 }

@@ -1,7 +1,11 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">ABND_P7</string>
     <string name="insert_dummy_data">Insert dummy data</string>
-    <string name="product_added">Product <xliff:g example="1" id="prod_id">%d</xliff:g> added</string>
+    <string name="delete_all_data">Delete all data</string>
+    <string name="product_added">Product <xliff:g example="car" id="prod_name">%s</xliff:g> added</string>
+    <string name="product_updated">Product <xliff:g example="car" id="prod_name">%s</xliff:g> updated</string>
+    <string name="product_deleted">Product deleted</string>
+    <string name="all_products_deleted">All products deleted</string>
     <string name="error_add">Error adding the product</string>
     <string name="product_name">Name</string>
     <string name="product_price">Price</string>

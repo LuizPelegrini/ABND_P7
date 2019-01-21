@@ -1,7 +1,10 @@
 package com.example.android.abnd_p7;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,9 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
+import com.example.android.abnd_p7.util.Message;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -85,10 +88,13 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.save_product_action:
-                // TODO: insert the product into the database, show SUCCESS message, go to MainActivity
+                // insert the product into the database, show SUCCESS message, go to MainActivity
+                if(saveProduct())
+                    finish();
                 break;
             case R.id.delete_product_action:
                 // TODO: show confirmation dialog, delete if accepted, go to MainActivity
+//                deleteProduct();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -96,7 +102,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        //TODO: hide the delete option if the activity has been initialized at the creation mode
+        // hide the delete option if the activity has been initialized at the creation mode
         if(mIsCreationMode)
             menu.findItem(R.id.delete_product_action).setVisible(false);
 
@@ -111,6 +117,45 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         mProductQuantityTextView.setText(String.valueOf(mQuantity));
         mSupplierNameEditText.setText(supplierName);
         mSupplierPhoneEditText.setText(supplierPhone);
+    }
+
+    // Create contentValue object and insert the product into the database
+    private boolean saveProduct(){
+        boolean success = false;
+
+        String productName = mProductNameEditText.getText().toString();
+        int productPrice = parsePriceText(mProductPriceEditText.getText().toString());
+        int productQuantity = Integer.parseInt(mProductQuantityTextView.getText().toString());
+        String supplierName = mSupplierNameEditText.getText().toString();
+        String supplierPhone = mSupplierPhoneEditText.getText().toString();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_NAME, productName);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_PRICE, productPrice);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, productQuantity);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_NAME, supplierName);
+        contentValues.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER_PHONE, supplierPhone);
+
+        try {
+            if(mIsCreationMode) {
+                getContentResolver().insert(ProductEntry.CONTENT_URI, contentValues);
+                Message.showPlainTextToast(this, getString(R.string.product_added, productName));
+            } else {
+                getContentResolver().update(mEntryUri, contentValues, null, null);
+                Message.showPlainTextToast(this, getString(R.string.product_updated, productName));
+            }
+            success = true;
+        }catch(SQLException e){
+            Message.showErrorToast(this, e.getMessage());
+        }catch (IllegalArgumentException e){
+            Message.showPlainTextToast(this, e.getMessage());
+        }
+
+        return success;
+    }
+
+    private int parsePriceText(String priceString){
+        return Integer.parseInt(priceString);
     }
 
 
