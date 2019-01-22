@@ -17,6 +17,9 @@ import com.example.android.abnd_p7.DetailsActivity;
 import com.example.android.abnd_p7.R;
 import com.example.android.abnd_p7.data.StoreContract;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -26,10 +29,12 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
     private CursorAdapter mCursorAdapter;
     private Context mContext;
+    private NumberFormat mNumberFormat;
 
     public ProductRecyclerAdapter(Context context, Cursor cursor){
         mContext = context;
         mCursorAdapter = new ProductAdapter(context, cursor);
+        mNumberFormat = NumberFormat.getCurrencyInstance(Locale.US);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{
@@ -52,13 +57,13 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
                     Log.d(TAG, "Id: " + id);
 
-//                    // Creates the uri based on the product id
+                    // Creates the uri based on the product id
                     Uri uri = ContentUris.withAppendedId(StoreContract.ProductEntry.CONTENT_URI, id);
-//
-//                    // Put the uri in the intent
+
+                    // Put the uri in the intent
                     intent.setDataAndType(uri, context.getContentResolver().getType(uri));
-//
-//                    // Starts the DetailsActivity with this intent
+
+                    // Starts the DetailsActivity with this intent
                     context.startActivity(intent);
                 }
             });
@@ -91,7 +96,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
         // and set the ViewHolder's views data
         viewHolder.mProductName.setText(name);
-        viewHolder.mProductPrice.setText(mContext.getString(R.string.price_format, price));
+        viewHolder.mProductPrice.setText(price);
         viewHolder.mProductQuantity.setText(quantity);
         viewHolder.id = id;
     }
@@ -109,17 +114,21 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
     /** Formats the price value so it shows with two decimal digits */
     private String formatPrice(int price){
-        int dollars = price / 100;
 
-        int cents = price % 100;
-        String centsString = "";
+        double d = price / 100d;
 
-        if(cents < 10){
-            centsString = "0";
-        }
-
-        centsString += String.valueOf(cents);
-
-        return String.valueOf(dollars) + "." + centsString;
+        return mNumberFormat.format(d);
+//        int dollars = price / 100;
+//
+//        int cents = price % 100;
+//        String centsString = "";
+//
+//        if(cents < 10){
+//            centsString = "0";
+//        }
+//
+//        centsString += String.valueOf(cents);
+//
+//        return String.valueOf(dollars) + "." + centsString;
     }
 }

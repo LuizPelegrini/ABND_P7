@@ -17,6 +17,9 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,7 @@ import android.widget.TextView;
 
 import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
 import com.example.android.abnd_p7.util.Message;
+import com.example.android.abnd_p7.util.NumberTextWatcher;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,16 +61,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         setContentView(R.layout.details_layout);
         ButterKnife.bind(this);
 
-        // Gets the intent coming from the MainActivity
-        Intent intent = getIntent();
-        if(intent.getData() != null){
-            mIsCreationMode = false;
-            mEntryUri = intent.getData();
-            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-        }else{
-            mIsCreationMode = true;
-            setInfoUI("", 0, 0, "","");
-        }
+        // Add a watcher to format the edit text field
+        mProductPriceEditText.addTextChangedListener(new NumberTextWatcher(mProductPriceEditText));
 
         mDecreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +81,17 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 mProductQuantityTextView.setText(String.valueOf(mQuantity));
             }
         });
+
+        // Gets the intent coming from the MainActivity
+        Intent intent = getIntent();
+        if(intent.getData() != null){
+            mIsCreationMode = false;
+            mEntryUri = intent.getData();
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        }else{
+            mIsCreationMode = true;
+            setInfoUI("", 0, 0, "","");
+        }
     }
 
     @Override
@@ -153,7 +160,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         mProductNameEditText.setText(name);
         mNameToCompare = name;
-        // TODO: Format the value of price before setting it in the edittext
         mProductPriceEditText.setText(String.valueOf(price));
         mPriceToCompare = price;
         mProductQuantityTextView.setText(String.valueOf(mQuantity));
@@ -243,13 +249,13 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         String name = mProductNameEditText.getText().toString();
         int quantity = Integer.parseInt(mProductQuantityTextView.getText().toString());
         // TODO: Get the price edittext and format it to represent a whole number before comparing
-//        int price =
+        int price = parsePriceText(mProductPriceEditText.getText().toString());
         String supplierName = mSupplierNameEditText.getText().toString();
         String supplierPhone = mSupplierPhoneEditText.getText().toString();
 
         return !name.equals(mNameToCompare) ||
                quantity != mQuantityToCompare ||
-//                price != mPriceToCompare ||
+               price != mPriceToCompare ||
                !supplierName.equals(mSupplierNameToCompare) ||
                !supplierPhone.equals(mSupplierPhoneToCompare);
     }
@@ -261,9 +267,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         }
     }
 
-    // TODO: Parse the formatted text into a whole integer
+    // Parse the formatted text into a whole integer
     private int parsePriceText(String priceString){
-        return Integer.parseInt(priceString);
+        String cleanString = priceString.replaceAll("[$.,]", "");
+        return Integer.parseInt(cleanString);
     }
 
 
