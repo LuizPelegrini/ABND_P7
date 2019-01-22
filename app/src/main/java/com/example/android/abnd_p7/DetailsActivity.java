@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -54,6 +55,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @BindView(R.id.decrease_quantity_button) ImageView mDecreaseQuantityImageView;
     @BindView(R.id.increase_quantity_button) ImageView mIncreaseQuantityImageView;
     @BindView(R.id.quantity_text) TextView mProductQuantityTextView;
+    @BindView(R.id.call_supplier_button) Button mCallSupplierButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,26 +63,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         setContentView(R.layout.details_layout);
         ButterKnife.bind(this);
 
-        // Add a watcher to format the edit text field
-        mProductPriceEditText.addTextChangedListener(new NumberTextWatcher(mProductPriceEditText));
-
-        mDecreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mQuantity > 0){
-                    mQuantity--;
-                    mProductQuantityTextView.setText(String.valueOf(mQuantity));
-                }
-            }
-        });
-
-        mIncreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mQuantity++;
-                mProductQuantityTextView.setText(String.valueOf(mQuantity));
-            }
-        });
+        addListenersToViews();
 
         // Gets the intent coming from the MainActivity
         Intent intent = getIntent();
@@ -88,8 +71,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             mIsCreationMode = false;
             mEntryUri = intent.getData();
             getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+            mCallSupplierButton.setVisibility(View.VISIBLE);
         }else{
             mIsCreationMode = true;
+            mCallSupplierButton.setVisibility(View.GONE);
             setInfoUI("", 0, 0, "","");
         }
     }
@@ -273,6 +258,57 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         return Integer.parseInt(cleanString);
     }
 
+
+    private void addListenersToViews(){
+        // Add a watcher to format the edit text field
+        mProductPriceEditText.addTextChangedListener(new NumberTextWatcher(mProductPriceEditText));
+
+        mDecreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mQuantity > 0){
+                    mQuantity--;
+                    mProductQuantityTextView.setText(String.valueOf(mQuantity));
+                }
+            }
+        });
+
+        mIncreaseQuantityImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mQuantity++;
+                mProductQuantityTextView.setText(String.valueOf(mQuantity));
+            }
+        });
+
+        // Add a text watcher to the supplier phone edit text to track whether is empty or not
+        mSupplierPhoneEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // if there is no phone number entered, hide the button. Otherwise, show the call supplier button
+                if(charSequence.length() == 0)
+                    mCallSupplierButton.setVisibility(View.GONE);
+                else
+                    mCallSupplierButton.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+
+        // Add a click listener responsible to open the phone app to call the supplier
+        mCallSupplierButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri phoneUri = Uri.parse("tel:"+mSupplierPhoneEditText.getText().toString());
+                Intent intent = new Intent(Intent.ACTION_DIAL, phoneUri);
+                startActivity(intent);
+            }
+        });
+    }
 
     /*************************** LOADER CALLBACKS *********************************/
 

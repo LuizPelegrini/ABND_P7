@@ -16,9 +16,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.abnd_p7.adapter.ProductRecyclerAdapter;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.result_text_view) TextView mDataTextView;        // Reference to the view that shows the results
     @BindView(R.id.fab) FloatingActionButton mFloatActionButton;    // The FAB reference
     @BindView(R.id.recycler_view) RecyclerView mRecyclerView;       // The RecyclerView reference
+    @BindView(R.id.no_products_image) ImageView mImageView;
 
     private ProductRecyclerAdapter mAdapter;                        // The adapter to be used by the RecyclerView
 
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ProductRecyclerAdapter(this, null);
         mRecyclerView.setAdapter(mAdapter);
+        mImageView.setVisibility(View.GONE);
 
         getSupportLoaderManager().initLoader(LOADER_ID,null, this);
     }
@@ -134,10 +138,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         mAdapter.changeCursor(cursor);
+        if(cursor.getCount() == 0){
+            mImageView.setVisibility(View.VISIBLE);
+        }
+        Log.d("TAG", "Hello from FINISHED");
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         mAdapter.changeCursor(null);
+        Log.d("TAG", "Hello from RESET");
     }
 }

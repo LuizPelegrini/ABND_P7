@@ -55,8 +55,6 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
                     // Creates the intent
                     Intent intent = new Intent(context, DetailsActivity.class);
 
-                    Log.d(TAG, "Id: " + id);
-
                     // Creates the uri based on the product id
                     Uri uri = ContentUris.withAppendedId(StoreContract.ProductEntry.CONTENT_URI, id);
 

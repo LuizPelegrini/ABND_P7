@@ -19,6 +19,7 @@
     <string name="delete_product_menu_action">Delete this product</string>
     <string name="save_product_menu_action">Save product</string>
     <string name="delete_product_successfully">Product deleted successfully</string>
+    <string name="call_supplier">Call Supplier</string>
 
     <!--Error messages-->
     <string name="no_name">You must provide a name.</string>
