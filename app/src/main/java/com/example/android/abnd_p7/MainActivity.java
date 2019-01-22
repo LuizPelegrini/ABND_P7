@@ -1,6 +1,7 @@
 package com.example.android.abnd_p7;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -11,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,22 +55,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ProductRecyclerAdapter(this, null);
         mRecyclerView.setAdapter(mAdapter);
-//        mRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                // Creates the intent
-//                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-//
-//                // Creates the uri based on the product id
-//                Uri uri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, id);
-//
-//                // Put the uri in the intent
-//                intent.setDataAndType(uri, getContentResolver().getType(uri));
-//
-//                // Starts the DetailsActivity with this intent
-//                startActivity(intent);
-//            }
-//        });
 
         getSupportLoaderManager().initLoader(LOADER_ID,null, this);
     }
@@ -112,10 +98,30 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 insertDummyProduct();
                 break;
             case R.id.delete_all_data:
-                deleteAllData();
+                showAlertDialog();
                 break;
         }
         return true;
+    }
+
+    private void showAlertDialog(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(R.string.dialog_delete_all_message);
+        alertDialogBuilder.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                deleteAllData();
+            }
+        });
+        alertDialogBuilder.setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(dialogInterface != null)
+                    dialogInterface.dismiss();
+            }
+        });
+
+        alertDialogBuilder.create().show();
     }
 
     /******************* Loader callbacks *******************/
