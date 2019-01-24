@@ -20,6 +20,8 @@
     <string name="save_product_menu_action">Save product</string>
     <string name="delete_product_successfully">Product deleted successfully</string>
     <string name="call_supplier">Call Supplier</string>
+    <string name="no_data_info">Oops... No products to be shown</string>
+    <string name="no_data_info_instruction">Click on the \'+\' icon to add one</string>
 
     <!--Error messages-->
     <string name="no_name">You must provide a name.</string>

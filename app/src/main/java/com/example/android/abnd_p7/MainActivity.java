@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.android.abnd_p7.adapter.ProductRecyclerAdapter;
@@ -32,12 +33,12 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int LOADER_ID = 0;                         // The loader id when it is initialized
+    private static final int LOADER_ID = 0;                             // The loader id when it is initialized
 
-    @BindView(R.id.result_text_view) TextView mDataTextView;        // Reference to the view that shows the results
-    @BindView(R.id.fab) FloatingActionButton mFloatActionButton;    // The FAB reference
-    @BindView(R.id.recycler_view) RecyclerView mRecyclerView;       // The RecyclerView reference
-    @BindView(R.id.no_products_image) ImageView mImageView;
+    @BindView(R.id.result_text_view) TextView mDataTextView;            // Reference to the view that shows the results
+    @BindView(R.id.fab) FloatingActionButton mFloatActionButton;        // The FAB reference
+    @BindView(R.id.recycler_view) RecyclerView mRecyclerView;           // The RecyclerView reference
+    @BindView(R.id.no_products_info_layout) View mNoProductsInfoView;   // A view that appears when there is no product to be shown
 
     private ProductRecyclerAdapter mAdapter;                        // The adapter to be used by the RecyclerView
 
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ProductRecyclerAdapter(this, null);
         mRecyclerView.setAdapter(mAdapter);
-        mImageView.setVisibility(View.GONE);
+        mNoProductsInfoView.setVisibility(View.GONE);
 
         getSupportLoaderManager().initLoader(LOADER_ID,null, this);
     }
@@ -138,10 +139,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         mAdapter.changeCursor(cursor);
-        if(cursor.getCount() == 0){
-            mImageView.setVisibility(View.VISIBLE);
-        }
-        Log.d("TAG", "Hello from FINISHED");
+        if(cursor.getCount() == 0)
+            mNoProductsInfoView.setVisibility(View.VISIBLE);
+        else
+            mNoProductsInfoView.setVisibility(View.GONE);
     }
 
     @Override

@@ -38,11 +38,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <ImageView
-        android:id="@+id/no_products_image"
-        android:layout_width="wrap_content"
+    <!--<ImageView-->
+        <!--android:id="@+id/no_products_image"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:src="@drawable/ic_launcher_foreground"/>-->
+    <LinearLayout
+        android:id="@+id/no_products_info_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/ic_launcher_foreground"/>
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/product_title_size"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:text="@string/no_data_info"/>
+        <TextView
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/no_data_info_instruction"/>
+    </LinearLayout>
+
 
 </RelativeLayout>
