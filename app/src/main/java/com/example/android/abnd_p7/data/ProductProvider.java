@@ -17,6 +17,7 @@ public class ProductProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);  // The UriMatcher object used to map URI's
     private static final int PRODUCT = 0;                                               // The code to help find URI of all entries
     private static final int PRODUCT_ID = 1;                                            // The code to help find URI of a single entry
+    private static final int PRODUCT_QUANTITY = 2;                                      // The code to help find quantity URI of a single entry
 
     private StoreDbHelper mStoreDbHelper;
 
@@ -25,6 +26,8 @@ public class ProductProvider extends ContentProvider {
         sUriMatcher.addURI(StoreContract.CONTENT_AUTHORITY, ProductEntry.PATH_PRODUCT, PRODUCT);
         // content://com.example.android.abnd_p7.product/products/2
         sUriMatcher.addURI(StoreContract.CONTENT_AUTHORITY, ProductEntry.PATH_PRODUCT + "/#", PRODUCT_ID);
+        // content://com.example.android.abnd_p7.product/products/quantity/2
+        sUriMatcher.addURI(StoreContract.CONTENT_AUTHORITY, ProductEntry.PATH_PRODUCT_QUANTITY + "/#", PRODUCT_QUANTITY);
     }
 
     @Override
@@ -98,21 +101,14 @@ public class ProductProvider extends ContentProvider {
                 selection = ProductEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return updateProduct(uri, contentValues, selection, selectionArgs);
+            case PRODUCT_QUANTITY:
+                selection = ProductEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updateProductQuantity(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Cannot update with URI " + uri);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -145,7 +141,7 @@ public class ProductProvider extends ContentProvider {
         SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
 
         // update the registry
-        int rowsAffected = db.update(ProductEntry.TABLE_NAME,contentValues, selection, selectionArgs);
+        int rowsAffected = db.update(ProductEntry.TABLE_NAME, contentValues, selection, selectionArgs);
 
         // If 1 or more rows were updated,
         // then notify all listeners that the data at the given URI has changed
@@ -155,6 +151,24 @@ public class ProductProvider extends ContentProvider {
 
         return rowsAffected;
     }
+
+    // Used to validate and update the quantity only
+    private int updateProductQuantity(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs){
+        if(contentValues.size() == 0)
+            throw new SQLException("empty");
+
+        int quantity = contentValues.getAsInteger(ProductEntry.COLUMN_PRODUCT_QUANTITY);
+        if(quantity < 0)
+            throw new SQLException(ProductEntry.COLUMN_PRODUCT_QUANTITY);
+
+        SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();
+        int rowsAffected = db.update(ProductEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        if(rowsAffected > 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
+        return rowsAffected;
+    }
+
 
     private int deleteProduct(Uri uri, String selection, String[] selectionArgs){
         SQLiteDatabase db = mStoreDbHelper.getWritableDatabase();

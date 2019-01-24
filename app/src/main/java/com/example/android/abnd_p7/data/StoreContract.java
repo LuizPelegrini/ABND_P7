@@ -16,7 +16,9 @@ public final class StoreContract {
     // PRODUCT table
     public static class ProductEntry implements BaseColumns {
         public static final String PATH_PRODUCT = "products";
+        public static final String PATH_PRODUCT_QUANTITY = PATH_PRODUCT + "/quantity";
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PRODUCT);
+        public static final Uri CONTENT_URI_QUANTITY = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PRODUCT_QUANTITY);
 
         public static final String CONTENT_TYPE_DIR = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PRODUCT;
         public static final String CONTENT_TYPE_ITEM = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PRODUCT;

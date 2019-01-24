@@ -1,21 +1,25 @@
 package com.example.android.abnd_p7.adapter;
 
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.android.abnd_p7.DetailsActivity;
 import com.example.android.abnd_p7.R;
 import com.example.android.abnd_p7.data.StoreContract;
+import com.example.android.abnd_p7.util.Message;
+import com.example.android.abnd_p7.data.StoreContract.ProductEntry;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -41,7 +45,7 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         @BindView(R.id.product_name_text) TextView mProductName;
         @BindView(R.id.product_price_text) TextView mProductPrice;
         @BindView(R.id.product_quantity_text) TextView mProductQuantity;
-
+        @BindView(R.id.sale_button) Button mSaleButton;
         private long id;
 
         public ViewHolder(@NonNull View itemView, Context context) {
@@ -63,6 +67,23 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
 
                     // Starts the DetailsActivity with this intent
                     context.startActivity(intent);
+                }
+            });
+
+            mSaleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int quantity = Integer.parseInt(mProductQuantity.getText().toString());
+                    quantity--;
+                    Uri uri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI_QUANTITY, id);
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
+
+                    try {
+                        context.getContentResolver().update(uri, contentValues, null, null);
+                    } catch (SQLException e){
+                        Message.showErrorToast(context, e.getMessage());
+                    }
                 }
             });
         }
